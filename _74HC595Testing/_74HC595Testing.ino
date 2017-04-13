@@ -14,6 +14,7 @@
 ShiftRegister74HC595 sr (3, 5, 4, 0); 
  
 void setup() { 
+  
 }
 
 void loop() {
