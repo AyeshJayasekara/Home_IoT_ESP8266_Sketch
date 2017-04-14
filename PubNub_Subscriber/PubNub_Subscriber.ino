@@ -1,5 +1,5 @@
 /*********************************************************************************
-  Pubnub Subscribe Sample
+  Pubnub Subscribe 
 *********************************************************************************/
 #include <ESP8266WiFi.h>
 
@@ -12,13 +12,6 @@ const char* g_channel    = "kozi";
 String      timeToken    = "0";
 
 
-/*********************************************************************************
-  Function Name     : setup
-  Description       : Initialize the Serial Communication with baud 115200, Begin
-                    the ESP8266 and connect to the Router and print the ip
-  Parameters        : void
-  Return            : void
-*********************************************************************************/
 
 void setup()
 {
@@ -43,13 +36,6 @@ void setup()
 
 }
 
-/*********************************************************************************
-  Function Name     : loop
-  Description       : Connect to the PUBNUB REST API with TCP/IP Connection
-                    and Subscribe the sample data from the pubnub
-  Parameters        : void
-  Return            : void
-*********************************************************************************/
 
 void loop()
 {
