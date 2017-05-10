@@ -4,7 +4,7 @@
 #include <ESP8266WiFi.h>
 #include "ShiftRegister74HC595.h"
 const char* g_ssid       = "Dialog 4G";
-const char* g_password   = "soclab@1";
+const char* g_password   = "*******";
 const char* g_host       = "pubsub.pubnub.com";
 const char* g_pubKey     = "pub-c-784c01b6-34fa-46e2-aba7-5eebb8efac0e";
 const char* g_subKey     = "sub-c-764a7b9e-16a3-11e7-bb8a-0619f8945a4f";
