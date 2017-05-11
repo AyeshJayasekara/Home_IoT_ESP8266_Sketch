@@ -2,16 +2,19 @@
   Pubnub Subscribe 
 *********************************************************************************/
 #include <ESP8266WiFi.h>
+#include "VirtualDelay.h"
+VirtualDelay virtualDelay(millis);
 #include "ShiftRegister74HC595.h"
 const char* g_ssid       = "Dialog 4G";
 const char* g_password   = "*******";
 const char* g_host       = "pubsub.pubnub.com";
-const char* g_pubKey     = "pub-c-784c01b6-34fa-46e2-aba7-5eebb8efac0e";
-const char* g_subKey     = "sub-c-764a7b9e-16a3-11e7-bb8a-0619f8945a4f";
-const char* g_channel    = "kozi";
+const char* g_pubKey     = "pub-c-89d87bfb-89a1-4ae9-941c-631dd1ea5dbd";
+const char* g_subKey     = "sub-c-e7c47d7a-13be-11e7-a9ec-0619f8945a4f";
+const char* g_channel    = "0";
 String      timeToken    = "0";
 int arr[24];
 bool decodePending = true;
+bool decodePending2 = true;
 
 
 //int SER_Pin = 5;   //pin 14 on the 75HC595
@@ -27,7 +30,7 @@ bool decodePending = true;
 
 
 // create shift register object (number of shift registers, data pin, clock pin, latch pin)
-ShiftRegister74HC595 sr (3, 5, 4, 0); 
+ShiftRegister74HC595 sr (5, 5, 4, 0); 
 
 
 void setup()
@@ -53,51 +56,19 @@ void setup()
   for(int i = 0 ; i < 24 ; i++)
   arr[i]=0;
   sr.setAllLow();
+  setDigit();
 }
 
 
 void loop()
 {
-   // set all pins LOW
-  delay(500); 
-  WiFiClient client;
-  const int l_httpPort = 80;
-  if (!client.connect(g_host, l_httpPort))
-  {
-    Serial.println("connection failed");
-    return;
-  }
+//  delay(10); 
   //DATA FORMAT : http://pubsub.pubnub.com /publish/pub-key/sub-key/signature/channel/callback/message
   //SUB FORMAT :  http://pubsub.pubnub.com /subscribe/sub-key/channel/callback/timetoken
+  //if(virtualDelay.done(1000))
+  GET();
 
-  String url = "/subscribe/";
-  url += g_subKey;
-  url += "/";
-  url += g_channel;
-  url += "/0/";
-  url += timeToken;
-  Serial.println(url);
-
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + g_host + "\r\n" +
-               "Connection: close\r\n\r\n");
-  delay(10);
-
-  while (client.available())
-  {
-    String line = client.readStringUntil('\r');
-    if (line.endsWith("]"))
-    {
-        Serial.println(line);
-        getNextTimeToken(line);
-        if(decodePending)
-        decodeLine(line);
-    }
-  }
-  Serial.println("closing connection");
-  delay(200);
-
-   
+  //Serial.println(analogRead(A0));  
   //sr.set(5,HIGH);
   //delay(1000);
 //  for (int i = 0; i < 24; i++) {
@@ -112,12 +83,20 @@ void loop()
 //  }
   
 }
+void setDigit(){
+  int arr[4] = {0,0,0,0};
+  sr.set(37,LOW);
+  sr.set(38,HIGH);
+  sr.set(39,LOW);
+  sr.set(40,LOW);
+  
+}
 
 void getNextTimeToken(String l){
       //l=l.substring(l.lastIndexOf(',')).substring(2,l.length()-2)
     l=l.substring(l.lastIndexOf(','));
     l=l.substring(2,l.length()-2);
-    Serial.println(l);
+    //Serial.println(l);
     if(l == timeToken){
       timeToken= "0";
     }
@@ -141,7 +120,78 @@ void applyChanges(String msg){
           sr.set(i,LOW);
         else
           sr.set(i,HIGH);
+          if(msg.charAt(0)=='1')
+          POST();
    //sr.setAllHigh();
+}
+
+void POST(){
+  WiFiClient client;
+  const int l_httpPort = 80;
+  String puburl = "/publish/";
+  puburl += g_pubKey;
+  puburl += "/";
+  puburl += g_subKey;
+  puburl += "/0/";
+  //puburl += '"';
+  puburl += g_channel;
+ // puburl += '"';
+  puburl += "/0/";
+  puburl += '"';
+  puburl += "Ayesh";
+  puburl += '"';
+  if (!client.connect(g_host, l_httpPort))
+  {
+    Serial.println("connection failed");
+    return;
+  }
+  client.print(String("GET ") + puburl + " HTTP/1.1\r\n" +
+               "Host: " + g_host + "\r\n"+
+                "Connection: close\r\n\r\n");
+  delay(1);
+  while (client.available())
+  {
+    String line = client.readStringUntil('\r');
+    if (line.endsWith("]"))
+    {
+        Serial.println(line);
+    }
+  }
+  client.stop();
+  client.flush(); 
+}
+
+void GET(){
+  String url = "/subscribe/";
+  url += g_subKey;
+  url += "/";
+  url += g_channel;
+  url += "/0/";
+  url += timeToken;
+  WiFiClient client;
+  const int l_httpPort = 80;
+  if (!client.connect(g_host, l_httpPort))
+  {
+    Serial.println("connection failed");
+    return;
+  }
+  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+               "Host: " + g_host + "\r\n"+
+               "Connection: close\r\n\r\n");
+               delay(1);
+  while (client.available())
+  {
+    String line = client.readStringUntil('\r');
+    if (line.endsWith("]"))
+    {
+        Serial.println(line);
+        getNextTimeToken(line);
+        if(decodePending)
+        decodeLine(line);
+    }
+  }
+client.stop();
+client.flush();
 }
 
 
