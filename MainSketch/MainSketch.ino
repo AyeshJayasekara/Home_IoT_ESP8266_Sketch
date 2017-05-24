@@ -7,7 +7,7 @@
 VirtualDelay virtualDelay(millis);
 #include "ShiftRegister74HC595.h"
 const char* g_ssid       = "Dialog 4G";
-const char* g_password   = "soclab@123";
+const char* g_password   = "*******";
 const char* g_host       = "pubsub.pubnub.com";
 const char* g_pubKey     = "pub-c-89d87bfb-89a1-4ae9-941c-631dd1ea5dbd";
 const char* g_subKey     = "sub-c-e7c47d7a-13be-11e7-a9ec-0619f8945a4f";
